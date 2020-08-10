@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
+<configuration>
+    <property>
+        <name>color</name>
+        <value>yellow</value>
+        <description>Color</description>
+    </property>
+    <property>
+        <name>size</name>
+        <value>10</value>
+        <description>Size</description>
+    </property>
+    <property>
+        <name>size-color</name>
+        <value>${size},${color}</value>
+        <description>Size-color</description>
+    </property>
+
+</configuration>
+
