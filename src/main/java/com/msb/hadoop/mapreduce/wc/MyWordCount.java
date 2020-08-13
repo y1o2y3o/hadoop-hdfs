@@ -4,7 +4,9 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.Text;
+import org.apache.hadoop.mapreduce.InputFormat;
 import org.apache.hadoop.mapreduce.Job;
+import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
 import org.apache.hadoop.util.GenericOptionsParser;
@@ -39,6 +41,9 @@ public class MyWordCount {
 
         // Specify various job-specific parameters
         job.setJobName("job_01");
+
+//        job.setInputFormatClass();
+//        FileInputFormat.setMinInputSplitSize();
 
         Path infile = new Path(othargs[0]);
         TextInputFormat.addInputPath(job, infile);

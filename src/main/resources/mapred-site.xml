@@ -22,4 +22,12 @@
         <value>yarn</value>
     </property>
 
+    <property>
+        <name>mapreduce.jobhistory.address</name>
+        <value>node02:10020</value>
+    </property>
+    <property>
+        <name>mapreduce.jobhistory.webapp.address</name>
+        <value>node02:19888</value>
+    </property>
 </configuration>

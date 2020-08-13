@@ -17,6 +17,7 @@ public class MyNcdc {
         Job job = Job.getInstance(conf);
 
         job.setJarByClass(MyNcdc.class);
+        job.setJar("/Users/zksfromusa/SpringBoot Projects/hadoop-hdfs/target/hadoop-hdfs-1.0.jar");
 
         // Specify various job-specific parameters
         job.setJobName("job_ncdc_01");
@@ -30,13 +31,18 @@ public class MyNcdc {
         }
 
         TextOutputFormat.setOutputPath(job, outfile);
+
         job.setMapperClass(MaxTemperatureMapper.class);
-        job.setMapOutputKeyClass(Text.class);
-        job.setMapOutputValueClass(FloatWritable.class);
-//        job.setReducerClass(MyReducer.class);
+//        job.setMapOutputKeyClass(Text.class);
+//        job.setMapOutputValueClass(FloatWritable.class);
+        job.setCombinerClass(MaxTemperatureReducer.class);
+        job.setReducerClass(MaxTemperatureReducer.class);
+        job.setOutputKeyClass(Text.class);
+        job.setOutputValueClass(FloatWritable.class);
 
         // Submit the job, then poll for progress until the job is complete
         job.waitForCompletion(true);
+
 
     }
 }
