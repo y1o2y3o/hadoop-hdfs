@@ -15,14 +15,18 @@ public class NcdcRecordParser {
     public void parse(String record) {
         year = record.substring(15, 19);
         String airTemperatureString;
-        if (record.charAt(87) == '+') {
-            airTemperatureString = record.substring(88, 92);
-        } else {
-            airTemperatureString = record.substring(87, 92);
+        try{
+            if (record.charAt(87) == '+') {
+                airTemperatureString = record.substring(88, 92);
+            } else {
+                airTemperatureString = record.substring(87, 92);
+            }
+            airTemperature = Integer.parseInt(airTemperatureString);
+            quality = record.substring(92, 93);
+        } catch (Exception e){
+            System.err.print(e.toString());
+            quality = "bad";
         }
-
-        airTemperature = Integer.parseInt(airTemperatureString);
-        quality = record.substring(92, 93);
     }
 
 
