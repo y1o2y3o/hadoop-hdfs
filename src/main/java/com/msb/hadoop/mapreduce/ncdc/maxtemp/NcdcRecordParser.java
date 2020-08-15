@@ -9,6 +9,7 @@ public class NcdcRecordParser {
     private static final int MISSING_TEMPERATURE = 9999;
 
     private String year;
+    private int yearInt;
     private int airTemperature;
     public String quality;
 
@@ -22,6 +23,7 @@ public class NcdcRecordParser {
                 airTemperatureString = record.substring(87, 92);
             }
             airTemperature = Integer.parseInt(airTemperatureString);
+            yearInt = Integer.parseInt(year);
             quality = record.substring(92, 93);
         } catch (Exception e){
             System.err.print(e.toString());
@@ -42,6 +44,11 @@ public class NcdcRecordParser {
     public String getYear() {
         return year;
     }
+
+    public int getYearInt(){
+        return yearInt;
+    }
+
 
     public int getAirTemperature() {
         return airTemperature;
