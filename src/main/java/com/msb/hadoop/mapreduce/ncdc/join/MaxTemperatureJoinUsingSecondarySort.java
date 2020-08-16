@@ -11,17 +11,17 @@ import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
 
-import java.io.DataInput;
-import java.io.DataOutput;
-import java.io.IOException;
+import java.io.*;
+import java.net.URI;
+import java.util.HashMap;
 import java.util.Iterator;
 
-public class MaxTemperatureUsingSecondarySort {
+public class MaxTemperatureJoinUsingSecondarySort {
     static class IntPair implements WritableComparable<IntPair> {
         private IntWritable year;
         private IntWritable temperature;
 
-        public IntPair(){
+        public IntPair() {
             year = new IntWritable();
             temperature = new IntWritable();
         }
@@ -92,34 +92,48 @@ public class MaxTemperatureUsingSecondarySort {
         }
     }
 
-    static class MaxTemperatureMapper extends Mapper<LongWritable, Text, IntPair, NullWritable> {
+    static class MaxTemperatureMapper extends Mapper<LongWritable, Text, IntPair, Text> {
         private final NcdcRecordParser parser = new NcdcRecordParser();
+        private HashMap<String, String> dict = new HashMap<>();
+
+        @Override
+        protected void setup(Context context) throws IOException, InterruptedException {
+            final BufferedReader reader = new BufferedReader(new FileReader(new File("dict")));
+
+            String line = reader.readLine();
+            while (line != null) {
+                final String[] split = line.split("\t");
+                //System.out.println(line);
+                dict.put(split[0], split[1]);
+                line = reader.readLine();
+            }
+        }
 
         @Override
         protected void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException {
             parser.parse(value);
             if (parser.isValidTemperature()) {
-                context.write(new IntPair(parser.getYearInt(), parser.getAirTemperature()), NullWritable.get());
+                context.write(new IntPair(parser.getYearInt(), parser.getAirTemperature()), new Text(parser.getQuality() + "\t" + dict.get(parser.getQuality())));
             }
         }
     }
 
-    static class MaxTemperatureReducer extends Reducer<IntPair, NullWritable, IntPair, NullWritable> {
+    static class MaxTemperatureReducer extends Reducer<IntPair, Text, IntPair, Text> {
         @Override
-        protected void reduce(IntPair key, Iterable <NullWritable> values, Context context) throws IOException, InterruptedException {
+        protected void reduce(IntPair key, Iterable<Text> values, Context context) throws IOException, InterruptedException {
             int i = 0;
-            Iterator<NullWritable> iterator = values.iterator();
-            while(iterator.hasNext() && i < 2){
-                iterator.next();
+            Iterator<Text> iterator = values.iterator();
+            while (iterator.hasNext() && i < 2) {
+                Text value = iterator.next();
                 ++i;
-                context.write(key, NullWritable.get());
+                context.write(key, value);
             }
         }
     }
 
-    public static class FirstPartitioner extends Partitioner<IntPair, NullWritable> {
+    public static class FirstPartitioner extends Partitioner<IntPair, Text> {
         @Override
-        public int getPartition(IntPair intPair, NullWritable nullWritable, int numPartitions) {
+        public int getPartition(IntPair intPair, Text values, int numPartitions) {
             return Math.abs(intPair.getYear().get() * 127) % numPartitions;
         }
     }
@@ -161,19 +175,20 @@ public class MaxTemperatureUsingSecondarySort {
         Job job = Job.getInstance(conf);
 
         // jar包
-        job.setJarByClass(MaxTemperatureUsingSecondarySort.class);
+        job.setJarByClass(MaxTemperatureJoinUsingSecondarySort.class);
         job.setJar("target/hadoop-hdfs-1.0.jar");
 
         // 路径
         Path in = new Path("ncdc/input");
         TextInputFormat.addInputPath(job, in);
-        Path out = new Path("ncdc/output4");
-        if(out.getFileSystem(conf).exists(out)){
+        Path out = new Path("ncdc/output04");
+        if (out.getFileSystem(conf).exists(out)) {
             out.getFileSystem(conf).delete(out, true);
         }
         TextOutputFormat.setOutputPath(job, out);
 
         // mapred
+        job.addCacheFile(new Path("ncdc/cache/dict").toUri());
         job.setInputFormatClass(TextInputFormat.class);
 
         job.setMapperClass(MaxTemperatureMapper.class);
@@ -183,13 +198,13 @@ public class MaxTemperatureUsingSecondarySort {
         job.setGroupingComparatorClass(GroupComparator.class);
 
         job.setMapOutputKeyClass(IntPair.class);
-        job.setMapOutputValueClass(NullWritable.class);
+        job.setMapOutputValueClass(Text.class);
 
         job.setReducerClass(MaxTemperatureReducer.class);
         job.setCombinerClass(MaxTemperatureReducer.class);
         job.setOutputFormatClass(TextOutputFormat.class);
         job.setOutputKeyClass(IntPair.class);
-        job.setOutputValueClass(NullWritable.class);
+        job.setOutputValueClass(Text.class);
 
         // run
         job.waitForCompletion(true);
