@@ -12,7 +12,6 @@ import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
 
 import java.io.*;
-import java.net.URI;
 import java.util.HashMap;
 import java.util.Iterator;
 

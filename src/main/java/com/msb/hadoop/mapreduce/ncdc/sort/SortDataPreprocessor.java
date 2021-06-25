@@ -1,6 +1,5 @@
 package com.msb.hadoop.mapreduce.ncdc.sort;
 
-import com.msb.hadoop.mapreduce.ncdc.maxtemp.MyNcdc;
 import com.msb.hadoop.mapreduce.ncdc.maxtemp.NcdcRecordParser;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
@@ -13,7 +12,6 @@ import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
-import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
 
 import java.io.IOException;
 
